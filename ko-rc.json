@@ -1,0 +1,24 @@
+{
+  "regexps":{
+    "APP":"rchApp",
+    "N_":"rch"
+  },
+  "P":{
+    "defaultPath":"src",
+    "servedFrom":"src/"
+  },
+  "D":{
+    "defaultPath":"src",
+    "servedFrom":"src/"
+  },
+  "R":{
+    "defaultPath":"src",
+    "servedFrom":"src/"
+  },
+  "S":{
+    "defaultPath":"src/services"
+  },
+  "E":{
+    "defaultPath":"e2e"
+  }
+}
