@@ -3,7 +3,7 @@
     "APP":"rchApp",
     "N_":"rch"
   },
-  "P":{
+  "p":{
     "defaultPath":"src",
     "servedFrom":"src/"
   },
