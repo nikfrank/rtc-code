@@ -1,11 +1,15 @@
 import angular from 'angular';
 import './p.css';
+import Cani from 'canijs/cani.js';
+import bootRTC from 'canijs/in-the-works/cani-webrtc/cani-webrtc.js';
+import io from 'socket.io-client';
 
+Cani.rtc = bootRTC({}, Cani, io);
 
 class Ctrl {
   constructor() {
-    console.log('...');
-    this.url = 'https://github.com/preboot/angular-webpack';
+    console.log('....');
+    console.log(Cani);
   }
 }
 
