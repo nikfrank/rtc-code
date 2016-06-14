@@ -8,8 +8,18 @@ Cani.rtc = bootRTC({}, Cani, io);
 
 class Ctrl {
   constructor() {
+//    let socket = io('http://localhost:8500');
+  //  socket.emit('makeroom', {room:{id:'party'}});
+
+
     console.log('....');
     console.log(Cani);
+    Cani.core.confirm('rtc').then(rtc=>{
+      this.offer = ()=>{
+	rtc.offer();
+      };
+    });
+
   }
 }
 
