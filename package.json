@@ -17,6 +17,7 @@
   "license": "FUCK OFF, THIS SHIT IS MINE.",
   "dependencies": {
     "angular": "^1.5.0",
+    "canijs": "^0.2.11",
     "q": "^1.4.1",
     "socket.io": "^1.4.6"
   },

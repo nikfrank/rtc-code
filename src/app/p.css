@@ -1,4 +1,3 @@
-/* styles in src/style directory are applied to the whole page */
 body {
   background: #0147A7;
   color: #fff;
@@ -16,7 +15,10 @@ main {
   display: block;
 }
 
-footer {
-  text-align: center;
-  font-size: 0.8em;
+div.host {
+  height:50px;
+}
+
+span.active {
+  font-size:2em;
 }

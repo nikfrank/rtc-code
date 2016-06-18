@@ -1,9 +1,29 @@
 <main>
   <h1 class="title">Hello from nik!</h1>
 
-  <!-- Images (and assets) are parsed and loaded from within the public directory -->
-  <img src="/img/logo.png" ng-click="$ctrl.offer()">
+  <button ng-click="$ctrl.listRooms()">List Rooms</button>
+
+  <hr/>
+  
+  <input placeholder="roomName" ng-model="$ctrl.roomName"/>
+  <button ng-click="$ctrl.createRoom($ctrl.roomName)">Create Room</button>
+
+  <hr/>
+  OR
+  <hr/>
+
+  <input placeholder="userName" ng-model="userName"/>
+  <button ng-click="$ctrl.joinRoom($ctrl.roomName, userName)">Join Room</button>
+
+  <hr/>
+
+  <div class="host" ng-repeat="host in $ctrl.hosts">
+    <span ng-click="$ctrl.roomName = host.name" ng-class="{active:$ctrl.roomName == host.name}">
+      {{host.name}}
+    </span>
+  </div>
+  
+  <button ng-click="$ctrl.offer()">offer</button>
+  
+  
 </main>
-<footer>
-  <a ng-href="{{$ctrl.url}}">Webpack Angular Starter</a>
-</footer>
