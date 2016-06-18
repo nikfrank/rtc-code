@@ -12,9 +12,7 @@ bootRTC({}, Cani);
 class Ctrl {
   constructor($timeout) {
 
-    this.createRoom = name=> socket.emit('create-room', {name});
     this.listRooms = ()=> socket.emit('list-rooms');
-    
     socket.on('room-list', hosts=>{
       this.hosts = hosts;
       $timeout(()=>8, 0); // scope digest hack!... ugh
@@ -23,18 +21,26 @@ class Ctrl {
 
     
     Cani.core.confirm('rtc').then(rtc=>{
-      
+      // patron code
       this.joinRoom = (roomName, userName)=>{
 	let room = this.hosts[roomName];
+
+	let dcLabel = roomName+'||'+userName;
 	
 	// here, make an offer to the host of the room.
-	rtc.offer((offer, candidate)=> socket.emit('offer-to-room', {room, offer, candidate}),
+	rtc.offer((offer, candidate)=> socket.emit('offer-to-room', {room, offer, candidate, dcLabel}),
 		  receiveAnswer=> socket.on('answer-to-offerer', receiveAnswer),  
-		  answer=> console.log('answer from host', answer));
+		  answer=> console.log('answer from host', answer),
+		  dcLabel);
       };
 
-      socket.on('offer-to-host', ({offer, candidate, patronId})=>{
-	rtc.acceptOffer(offer, candidate, answer=> socket.emit('answer-to-patron', {answer, patronId}));
+      // host code
+      this.createRoom = name=> socket.emit('create-room', {name});
+      
+      socket.on('offer-to-host', ({offer, candidate, patronId, user})=>{
+	// here decide whether to accept or not!
+	rtc.acceptOffer({offer, candidate, user}, answer=>
+	  socket.emit('answer-to-patron', {answer, patronId}));
       });
       
     });
