@@ -1,6 +1,6 @@
 {
   "name": "rch",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "webpack based rtc voting app",
   "scripts": {
     "build": "rimraf dist && webpack --bail --progress --profile",
