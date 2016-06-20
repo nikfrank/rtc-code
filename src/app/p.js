@@ -29,7 +29,10 @@ class Ctrl {
 	
 	// here, make an offer to the host of the room.
 	rtc.offer((offer, candidate)=> socket.emit('offer-to-room', {room, offer, candidate, dcLabel}),
-		  receiveAnswer=> socket.on('answer-to-offerer', receiveAnswer),  
+		  receiveAnswer=> socket.on('answer-to-offerer', msg=>{
+		    receiveAnswer(msg);
+		    socket.removeAllListeners('answer-to-offerer');
+		  }),  
 		  answer=> console.log('answer from host', answer),
 		  dcLabel);
       };
@@ -37,9 +40,9 @@ class Ctrl {
       // host code
       this.createRoom = name=> socket.emit('create-room', {name});
       
-      socket.on('offer-to-host', ({offer, candidate, patronId, user})=>{
+      socket.on('offer-to-host', ({offer, candidate, patronId, dcLabel})=>{
 	// here decide whether to accept or not!
-	rtc.acceptOffer({offer, candidate, user}, answer=>
+	rtc.acceptOffer({offer, candidate, dcLabel}, answer=>
 	  socket.emit('answer-to-patron', {answer, patronId}));
       });
       
