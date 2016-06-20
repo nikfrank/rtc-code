@@ -22,8 +22,8 @@
       {{host.name}}
     </span>
   </div>
-  
-  <button ng-click="$ctrl.offer()">offer</button>
-  
+
+  <input ng-model="message">
+  <button ng-click="$ctrl.send($ctrl.roomName, userName, message)">send</button>
   
 </main>

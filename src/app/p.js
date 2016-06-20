@@ -33,7 +33,9 @@ class Ctrl {
 		    receiveAnswer(msg);
 		    socket.removeAllListeners('answer-to-offerer');
 		  }),  
-		  answer=> console.log('answer from host', answer),
+		  answer=>{
+		    rtc.listen(dcLabel, msg=> console.log('HOST SENT MESSAGE!', msg));
+		  },
 		  dcLabel);
       };
 
@@ -44,9 +46,19 @@ class Ctrl {
 	// here decide whether to accept or not!
 	rtc.acceptOffer({offer, candidate, dcLabel}, answer=>
 	  socket.emit('answer-to-patron', {answer, patronId}));
+
+	Cani.core.confirm('webrtc: datachannels['+dcLabel+'].onopen').then(dc=>{
+	  rtc.listen(dc.label, msg=> console.log('patron '+dc.label+' sent', msg));
+	});
       });
-      
+
+      this.send = (roomName, userName, msg)=>{
+	rtc.send(msg, roomName+'||'+userName).then(res=> console.log(res));
+      };
     });
+
+    this.send = ()=> console.log('rtc not yet ready!');
+    
   }
 }
 Ctrl.$inject = ['$timeout'];
