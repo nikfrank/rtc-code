@@ -11,49 +11,71 @@ bootRTC({}, Cani);
 
 class Ctrl {
   constructor($timeout) {
+    this.offers = [];
+    this.channels = [];
 
+    
     this.listRooms = ()=> socket.emit('list-rooms');
     socket.on('room-list', hosts=>{
       this.hosts = hosts;
-      $timeout(()=>8, 0); // scope digest hack!... ugh
+      $timeout(()=>0,0); // scope digest hack!... ugh. looks like an owl
     });
     this.listRooms();
 
     
     Cani.core.confirm('rtc').then(rtc=>{
       // patron code
-      this.joinRoom = (roomName, userName)=>{
+      this.joinRoom = (roomName, userData)=>{
 	let room = this.hosts[roomName];
 
+	let userName = userData;
 	let dcLabel = roomName+'||'+userName;
 	
 	// here, make an offer to the host of the room.
-	rtc.offer((offer, candidate)=> socket.emit('offer-to-room', {room, offer, candidate, dcLabel}),
-		  receiveAnswer=> socket.on('answer-to-offerer', msg=>{
-		    receiveAnswer(msg);
-		    socket.removeAllListeners('answer-to-offerer');
-		  }),  
-		  answer=>{
-		    rtc.listen(dcLabel, msg=> console.log('HOST SENT MESSAGE!', msg));
-		  },
-		  dcLabel);
+	rtc.offer(
+	  // signalling function
+	  (offer, candidate)=> socket.emit('offer-to-room', {room, offer, candidate, dcLabel, userData}),
+
+	  // receive answer is more like "accept response to my offer"
+	  // this function is "how to await response to offer"... could put a hook for confirm-no-reneg.
+	  receiveAnswer=> socket.on('answer-to-offerer', msg=>{
+	    receiveAnswer(msg);
+	    socket.removeAllListeners('answer-to-offerer');
+	  }),  
+	  dc=>{
+	    this.channels.push(dc);
+	    rtc.listen(dc.label, msg=> console.log('HOST SENT MESSAGE!', msg));
+	    $timeout(()=>0,0);
+	  },
+	  dcLabel);
       };
 
       // host code
       this.createRoom = name=> socket.emit('create-room', {name});
-      
-      socket.on('offer-to-host', ({offer, candidate, patronId, dcLabel})=>{
-	// here decide whether to accept or not!
+
+      this.acceptOffer = oi=>{
+	let {offer, candidate, patronId, dcLabel, userData} = this.offers.splice(oi, 1)[0];
+	
 	rtc.acceptOffer({offer, candidate, dcLabel}, answer=>
 	  socket.emit('answer-to-patron', {answer, patronId}));
 
 	Cani.core.confirm('webrtc: datachannels['+dcLabel+'].onopen').then(dc=>{
+	  this.channels.push(dc);
 	  rtc.listen(dc.label, msg=> console.log('patron '+dc.label+' sent', msg));
+	  $timeout(()=>0,0);
 	});
+      };
+      
+      socket.on('offer-to-host', off=>{
+	this.offers.push(off);
+	$timeout(()=>0,0);
       });
 
-      this.send = (roomName, userName, msg)=>{
-	rtc.send(msg, roomName+'||'+userName).then(res=> console.log(res));
+      // both code
+      this.setCurrentChannel = ci=> (this.currentChannelIndex = ci);
+      
+      this.send = msg=>{
+	rtc.send(msg, this.channels[this.currentChannelIndex].label).then(res=> console.log(res));
       };
     });
 

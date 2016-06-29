@@ -1,15 +1,7 @@
-<main>
-  <h1 class="title">Hello from nik!</h1>
-
-  <button ng-click="$ctrl.listRooms()">List Rooms</button>
-
-  <hr/>
-  
+<main>  
   <input placeholder="roomName" ng-model="$ctrl.roomName"/>
   <button ng-click="$ctrl.createRoom($ctrl.roomName)">Create Room</button>
 
-  <hr/>
-  OR
   <hr/>
 
   <input placeholder="userName" ng-model="userName"/>
@@ -18,12 +10,34 @@
   <hr/>
 
   <div class="host" ng-repeat="host in $ctrl.hosts">
-    <span ng-click="$ctrl.roomName = host.name" ng-class="{active:$ctrl.roomName == host.name}">
+    <span ng-click="$ctrl.roomName = host.name"
+	  ng-class="{active:$ctrl.roomName == host.name}">
       {{host.name}}
     </span>
   </div>
 
   <input ng-model="message">
-  <button ng-click="$ctrl.send($ctrl.roomName, userName, message)">send</button>
+  <button ng-click="$ctrl.send(message)">
+    send
+  </button>
+
+  <hr/>
+
+  <div class="panel">
+    <ul class="tablet-list">
+      <li ng-repeat="offer in $ctrl.offers"
+	  ng-click="$ctrl.acceptOffer($index)">
+	{{offer.userData}}
+      </li>
+    </ul>
+
+    <ul class="tablet-list">
+      <li ng-repeat="channel in $ctrl.channels"
+	  ng-click="$ctrl.setCurrentChannel($index)"
+	  ng-class="{active:$index==$ctrl.currentChannelIndex}">
+	{{channel.label}}
+      </li>
+    </ul>
+  </div>
   
 </main>

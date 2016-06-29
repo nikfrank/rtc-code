@@ -19,6 +19,15 @@ div.host {
   height:50px;
 }
 
-span.active {
+.active {
   font-size:2em;
+}
+
+.panel {
+  display:flex;
+  justify-content:space-around;
+}
+
+ul.tablet-list {
+  width:35vw;
 }
