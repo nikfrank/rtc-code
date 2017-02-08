@@ -4,6 +4,9 @@ import Cani from 'canijs/cani.js';
 import bootRTC from 'canijs/in-the-works/cani-webrtc/cani-webrtc.js';
 import io from 'socket.io-client';
 
+import md5 from 'js-md5';
+console.log(md5);
+
 let socket = io('http://localhost:8500');
 
 Cani.core.affirm('socket', socket);
@@ -24,12 +27,13 @@ class Ctrl {
 
     
     Cani.core.confirm('rtc').then(rtc=>{
+
       // patron code
       this.joinRoom = (roomName, userData)=>{
 	let room = this.hosts[roomName];
 
 	let userName = userData;
-	let dcLabel = roomName+'||'+userName;
+	let dcLabel = roomName+'||'+userName;//+'||'+room.hostId;
 	
 	// here, make an offer to the host of the room.
 	rtc.offer(
@@ -38,20 +42,32 @@ class Ctrl {
 
 	  // receive answer is more like "accept response to my offer"
 	  // this function is "how to await response to offer"... could put a hook for confirm-no-reneg.
-	  receiveAnswer=> socket.on('answer-to-offerer', msg=>{
-	    receiveAnswer(msg);
-	    socket.removeAllListeners('answer-to-offerer');
-	  }),  
-	  dc=>{
-	    this.channels.push(dc);
-	    rtc.listen(dc.label, msg=> console.log('HOST SENT MESSAGE!', msg));
-	    $timeout(()=>0,0);
-	  },
+	  receiveAnswer=> socket.on('answer-to-offerer', answer=>{
+	    receiveAnswer(answer);
+	    socket.removeAllListeners('answer-to-offerer'); // irl patron can disconnect socket on answer
+	  }),
+	  
+	  // track offer by this dataChannel label
 	  dcLabel);
+
+	// once dataChannel established (ie remoteDescription set)
+	Cani.core.confirm('webrtc: datachannels['+dcLabel+'].onopen').then(dc=>{
+	  this.channels.push(dc);
+	  rtc.listen(dcLabel, msg=> console.log('HOST SENT MESSAGE!', msg));
+	  $timeout(()=>0,0);
+	});
+
+	Cani.core.disconfirm('webrtc: datachannels['+dcLabel+'].onopen').then(()=>{
+	  this.channels = this.channels.filter(ch=> ch.label !== dcLabel);
+	  $timeout(()=>0,0);
+	});
       };
 
+
+
+      
       // host code
-      this.createRoom = name=> socket.emit('create-room', {name});
+      this.createRoom = (name, secret)=> socket.emit('create-room', {name, secret});
 
       this.acceptOffer = oi=>{
 	let {offer, candidate, patronId, dcLabel, userData} = this.offers.splice(oi, 1)[0];
@@ -61,7 +77,12 @@ class Ctrl {
 
 	Cani.core.confirm('webrtc: datachannels['+dcLabel+'].onopen').then(dc=>{
 	  this.channels.push(dc);
-	  rtc.listen(dc.label, msg=> console.log('patron '+dc.label+' sent', msg));
+	  rtc.listen(dcLabel, msg=> console.log('patron '+dcLabel+' sent', msg));
+	  $timeout(()=>0,0);
+	});
+
+	Cani.core.disconfirm('webrtc: datachannels['+dcLabel+'].onopen').then(()=>{
+	  this.channels = this.channels.filter(ch=> ch.label !== dcLabel);
 	  $timeout(()=>0,0);
 	});
       };
@@ -71,6 +92,9 @@ class Ctrl {
 	$timeout(()=>0,0);
       });
 
+
+
+      
       // both code
       this.setCurrentChannel = ci=> (this.currentChannelIndex = ci);
       

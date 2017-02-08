@@ -1,6 +1,6 @@
 <main>  
   <input placeholder="roomName" ng-model="$ctrl.roomName"/>
-  <button ng-click="$ctrl.createRoom($ctrl.roomName)">Create Room</button>
+  <button ng-click="$ctrl.createRoom($ctrl.roomName, userName)">Create Room</button>
 
   <hr/>
 
@@ -12,7 +12,7 @@
   <div class="host" ng-repeat="host in $ctrl.hosts">
     <span ng-click="$ctrl.roomName = host.name"
 	  ng-class="{active:$ctrl.roomName == host.name}">
-      {{host.name}}
+      {{host.name}} - {{host.hostId}}
     </span>
   </div>
 
@@ -32,7 +32,7 @@
     </ul>
 
     <ul class="tablet-list">
-      <li ng-repeat="channel in $ctrl.channels"
+      <li ng-repeat="channel in $ctrl.channels track by $index"
 	  ng-click="$ctrl.setCurrentChannel($index)"
 	  ng-class="{active:$index==$ctrl.currentChannelIndex}">
 	{{channel.label}}
